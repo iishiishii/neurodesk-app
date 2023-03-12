@@ -5,6 +5,7 @@
   "main": "./build/out/main/main.js",
   "scripts": {
     "start": "electron .",
+    "dev": "npm run build && yarn create_env_installer:linux && npm run start",
     "start:windows": "electron . --windows-ui",
     "start:linux": "electron . --linux-ui",
     "start:mac": "electron . --mac-ui",
@@ -304,6 +305,7 @@
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "semver": "^7.3.4",
+    "toml": "^3.0.0",
     "update-electron-app": "^2.0.1",
     "which": "^2.0.2",
     "winreg": "^1.2.4",

@@ -204,32 +204,7 @@ export class SessionWindow implements IDisposable {
           this._sessionConfig.persistSessionData,
           this._sessionConfig.partition
         );
-      } else {
-        this._createServerForSession()
-          .then(() => {
-            this._updateContentView();
-            if (this._sessionConfig.filesToOpen.length > 0) {
-              this._labView.labUIReady.then(() => {
-                this._labView.openFiles();
-              });
-            }
-            appData.addSessionToRecents({
-              workingDirectory: this._sessionConfig.resolvedWorkingDirectory,
-              filesToOpen: [...this._sessionConfig.filesToOpen]
-            });
-          })
-          .catch(error => {
-            this._setProgress(
-              'Failed to create session',
-              `<div class="message-row">${error}</div>
-          <div class="message-row">
-            <a href="javascript:void(0);" onclick="sendMessageToMain('${EventTypeMain.ShowWelcomeView}')">Go to Welcome Page</a>
-          </div>`,
-              false
-            );
-          });
-        this._resizeViews();
-      }
+      } 
     } else {
       this._updateContentView();
     }
@@ -533,31 +508,32 @@ export class SessionWindow implements IDisposable {
         this._wsSettings = new WorkspaceSettings(
           sessionConfig.workingDirectory
         );
-        try {
-          await this._createServerForSession();
-          appData.addSessionToRecents({
-            workingDirectory: this._sessionConfig.resolvedWorkingDirectory,
-            filesToOpen: [...this._sessionConfig.filesToOpen]
-          });
-        } catch (error) {
-          this._showProgressView(
-            'Failed to create session!',
-            `
-            <div class="message-row">${error}</div>
-            <div class="message-row">
-              <a href="javascript:void(0);" onclick="sendMessageToMain('${EventTypeMain.ShowWelcomeView}')">Go to Welcome Page</a>
-            </div>
-            <div class="message-row">
-              <a href="javascript:void(0);" onclick="sendMessageToMain('${EventTypeMain.InstallBundledPythonEnv}')">Install / update Python environment using the bundled installer</a>
-            </div>
-            <div class="message-row">
-              <a href="javascript:void(0);" onclick="sendMessageToMain('${EventTypeMain.ShowServerSettings}')">Change the default Python environment</a>
-            </div>
-          `,
-            false
-          );
-        }
-
+        setTimeout(async () => {
+          try {
+            await this._createServerForSession();
+            appData.addSessionToRecents({
+              workingDirectory: this._sessionConfig.resolvedWorkingDirectory,
+              filesToOpen: [...this._sessionConfig.filesToOpen]
+            });
+          } catch (error) {
+            this._showProgressView(
+              'Failed to create session!',
+              `
+              <div class="message-row">${error}</div>
+              <div class="message-row">
+                <a href="javascript:void(0);" onclick="sendMessageToMain('${EventTypeMain.ShowWelcomeView}')">Go to Welcome Page</a>
+              </div>
+              <div class="message-row">
+                <a href="javascript:void(0);" onclick="sendMessageToMain('${EventTypeMain.InstallBundledPythonEnv}')">Install / update Python environment using the bundled installer</a>
+              </div>
+              <div class="message-row">
+                <a href="javascript:void(0);" onclick="sendMessageToMain('${EventTypeMain.ShowServerSettings}')">Change the default Python environment</a>
+              </div>
+            `,
+              false
+            );
+          }
+        
         this._contentViewType = ContentViewType.Lab;
         this._updateContentView();
         this._updateSessionWindowPositionConfig();
@@ -575,7 +551,9 @@ export class SessionWindow implements IDisposable {
           workingDirectory: sessionConfig.resolvedWorkingDirectory,
           filesToOpen: [...sessionConfig.filesToOpen]
         });
+      }, 15000);
       }
+      
     );
 
     this._evm.registerEventHandler(
@@ -615,6 +593,7 @@ export class SessionWindow implements IDisposable {
         this._selectRemoteServerUrl();
       }
     );
+
 
     this._evm.registerEventHandler(
       EventTypeMain.SetRemoteServerOptions,
