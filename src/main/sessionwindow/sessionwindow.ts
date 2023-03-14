@@ -31,6 +31,7 @@ import {
 import { IServerFactory, JupyterServer, JupyterServerFactory } from '../server';
 import {
   IDisposable,
+  IEnvironmentType,
   IPythonEnvironment,
   IRect,
   IVersionContainer
@@ -154,6 +155,17 @@ export class SessionWindow implements IDisposable {
         pythonPath
       );
     }
+    else {
+      let option: IPythonEnvironment = {
+        name: 'python',
+        path: 'C:\\',
+        type: IEnvironmentType.Path,
+        versions: {},
+        defaultKernel: 'python3'
+      };
+      serverOptions.environment = option;
+    }
+    console.debug('serverOptions ', serverOptions); 
 
     const server = await this.serverFactory.createServer(serverOptions);
     this._server = server;
@@ -1013,8 +1025,8 @@ export class SessionWindow implements IDisposable {
 
   private async _createEnvSelectPopup() {
     const envs = await this.registry.getEnvironmentList(false);
-    const defaultEnv = await this._registry.getDefaultEnvironment();
-    const defaultPythonPath = defaultEnv ? defaultEnv.path : '';
+    // const defaultEnv = await this._registry.getDefaultEnvironment();
+    const defaultPythonPath = '';
 
     this._envSelectPopup = new PythonEnvironmentSelectPopup({
       isDarkTheme: this._isDarkTheme,
@@ -1032,12 +1044,12 @@ export class SessionWindow implements IDisposable {
     }
 
     let currentPythonPath = this._wsSettings.getValue(SettingType.pythonPath);
-    if (!currentPythonPath) {
-      const defaultEnv = await this.registry.getDefaultEnvironment();
-      if (defaultEnv) {
-        currentPythonPath = defaultEnv.path;
-      }
-    }
+    // if (!currentPythonPath) {
+    //   const defaultEnv = await this.registry.getDefaultEnvironment();
+    //   if (defaultEnv) {
+    //     currentPythonPath = defaultEnv.path;
+    //   }
+    // }
 
     this._envSelectPopup.setCurrentPythonPath(currentPythonPath);
 
