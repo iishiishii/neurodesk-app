@@ -28,7 +28,7 @@ import {
 } from './config/settings';
 import { randomBytes } from 'crypto';
 
-const SERVER_LAUNCH_TIMEOUT = 30000; // milliseconds
+const SERVER_LAUNCH_TIMEOUT = 60000; // milliseconds
 const SERVER_RESTART_LIMIT = 3; // max server restarts
 
 function createTempFile(
@@ -57,7 +57,7 @@ function createLaunchScript(
   // note: traitlets<5.0 require fully specified arguments to
   // be followed by equals sign without a space; this can be
   // removed once jupyter_server requires traitlets>5.0
-  const launchArgs = ['docker run --shm-size=1gb -it --privileged --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage -p 8080:8080'];
+  const launchArgs = ['docker run -d --shm-size=1gb -it --privileged --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage -p 8080:8080'];
   launchArgs.push(`${isWin ? '' : '-e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)"'}`)
 
   const config = Config.loadConfig(path.join(__dirname, '..'));
@@ -91,7 +91,12 @@ function createLaunchScript(
 
   if (isWin) {
       script = `
-        CALL docker start neurodesktop
+        CALL if ($(docker image inspect vnmd/neurodesktop:${tag} --format="exists" 2> $null) -eq "exists") {
+          CALL docker start neurodesktop
+        } 
+        CALL else {
+          CALL ${launchCmd}
+        }
         `;
   } else {
       script = `
@@ -311,8 +316,9 @@ export class JupyterServer {
           }
         });
 
-        this._nbServer.on('exit', () => {
-          if (started) {
+        this._nbServer.on('stdout', (stdout) => {
+          console.log('exit: ' + stdout)
+          if (stdout == 'neurodesktop') {
             /* On Windows, JupyterLab server sometimes crashes randomly during websocket
               connection. As a result of this, users experience kernel connections failures.
               This crash only happens when server is launched from electron app. Since we
@@ -651,7 +657,6 @@ export class JupyterServerFactory implements IServerFactory, IDisposable {
       console.error('Failed to start server ~~', error);
       this._removeFailedServer(item.factoryId);
     });
-    console.debug('~ createdFreeServer ~ ', item);
     return item;
   }
 
