@@ -57,8 +57,12 @@ function createLaunchScript(
   // note: traitlets<5.0 require fully specified arguments to
   // be followed by equals sign without a space; this can be
   // removed once jupyter_server requires traitlets>5.0
-  const launchArgs = ['docker run -d --shm-size=1gb -it --privileged --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage -p 8080:8080'];
-  launchArgs.push(`${isWin ? '' : '-e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)"'}`)
+  const launchArgs = [
+    'docker run -d --shm-size=1gb -it --privileged --name neurodesktop -v ~/neurodesktop-storage:/neurodesktop-storage -p 8080:8080'
+  ];
+  launchArgs.push(
+    `${isWin ? '' : '-e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)"'}`
+  );
 
   const config = Config.loadConfig(path.join(__dirname, '..'));
   const tag = config.ConfigToml.version;
@@ -90,7 +94,7 @@ function createLaunchScript(
   let script: string;
 
   if (isWin) {
-      script = `
+    script = `
         CALL if ($(docker image inspect vnmd/neurodesktop:${tag} --format="exists" 2> $null) -eq "exists") {
           CALL docker start neurodesktop
         } 
@@ -99,7 +103,7 @@ function createLaunchScript(
         }
         `;
   } else {
-      script = `
+    script = `
       if [[ "$(docker image inspect vnmd/neurodesktop:${tag} --format='exists' 2> /dev/null)" == "exists" ]]; then
         docker start neurodesktop
       else 
@@ -124,7 +128,7 @@ async function checkIfUrlExists(url: URL): Promise<boolean> {
     const requestFn = url.protocol === 'https:' ? httpsRequest : httpRequest;
     const req = requestFn(url, function (r) {
       resolve(r.statusCode >= 200 && r.statusCode < 400);
-      console.debug(`Checking if ${url} exists... ${r.statusCode}`)
+      console.debug(`Checking if ${url} exists... ${r.statusCode}`);
     });
     req.on('error', function (err) {
       resolve(false);
@@ -153,7 +157,7 @@ export async function waitUntilServerIsUp(url: URL): Promise<boolean> {
 export class JupyterServer {
   constructor(options: JupyterServer.IOptions, registry: IRegistry) {
     this._options = options;
-    const option:  IPythonEnvironment = {
+    const option: IPythonEnvironment = {
       name: 'python',
       path: 'C:\\',
       type: IEnvironmentType.Path,
@@ -189,12 +193,12 @@ export class JupyterServer {
       return this._startServer;
     }
     let started = false;
-    console.debug("Starting Jupyter server....")
+    console.debug('Starting Jupyter server....');
     this._startServer = new Promise<JupyterServer.IInfo>(
       // eslint-disable-next-line no-async-promise-executor
       async (resolve, reject) => {
         const isWin = process.platform === 'win32';
-        console.debug("isWin: " + isWin)
+        console.debug('isWin: ' + isWin);
         // const pythonPath = this._info.environment.path;
         // if (!fs.existsSync(pythonPath)) {
         //   reject(`Error: Environment not found at: ${pythonPath}`);
@@ -205,7 +209,7 @@ export class JupyterServer {
         this._info.url = new URL(
           `http://localhost:8080/#/?username=user&password=password/`
         );
-        
+
         let baseCondaPath: string = '';
 
         if (this._info.environment.type === IEnvironmentType.CondaRoot) {
@@ -310,14 +314,14 @@ export class JupyterServer {
             fs.unlinkSync(launchScriptPath);
             resolve(this._info);
           } else {
-            console.debug("Server didn't start in time")
+            console.debug("Server didn't start in time");
             this._serverStartFailed();
             reject(new Error('Failed to launch Jupyter Server'));
           }
         });
 
-        this._nbServer.on('stdout', (stdout) => {
-          console.log('exit: ' + stdout)
+        this._nbServer.on('stdout', stdout => {
+          console.log('exit: ' + stdout);
           if (stdout == 'neurodesktop') {
             /* On Windows, JupyterLab server sometimes crashes randomly during websocket
               connection. As a result of this, users experience kernel connections failures.
@@ -648,7 +652,7 @@ export class JupyterServerFactory implements IServerFactory, IDisposable {
     // if (!opts?.environment) {
     //   env = await this._registry.getDefaultEnvironment();
     // } else {
-      // env = opts?.environment;
+    // env = opts?.environment;
     // }
     console.debug('~ createFreeServer', opts);
     opts = { ...opts, ...{ environment: env } };
@@ -683,9 +687,9 @@ export class JupyterServerFactory implements IServerFactory, IDisposable {
     // if (!opts?.environment) {
     //   env = await this._registry.getDefaultEnvironment();
     // } else {
-      // env = opts?.environment;
+    // env = opts?.environment;
     // }
-    console.log('~ createServer', opts?.environment)
+    console.log('~ createServer', opts?.environment);
     opts = { ...opts, ...{ environment: env } };
 
     item = (await this._findUnusedServer(opts)) || this._createServer(opts);
@@ -782,8 +786,7 @@ export class JupyterServerFactory implements IServerFactory, IDisposable {
   ): Promise<JupyterServerFactory.IFactoryItem | null> {
     const workingDir =
       opts?.workingDirectory || userSettings.resolvedWorkingDirectory;
-    const env =
-      opts?.environment;
+    const env = opts?.environment;
 
     let result = ArrayExt.findFirstValue(
       this._servers,
@@ -807,8 +810,7 @@ export class JupyterServerFactory implements IServerFactory, IDisposable {
     const workingDir =
       opts?.workingDirectory || userSettings.resolvedWorkingDirectory;
 
-    const env =
-      opts?.environment;
+    const env = opts?.environment;
 
     this._servers.forEach(server => {
       if (
