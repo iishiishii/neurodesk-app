@@ -18,7 +18,7 @@ import {
   getBundledPythonEnvPath,
   getBundledPythonPath,
   getEnvironmentPath,
-  getUserHomeDir,
+  getUserHomeDir
   // isPortInUse
 } from './utils';
 import { FrontEndMode, SettingType, userSettings } from './config/settings';
