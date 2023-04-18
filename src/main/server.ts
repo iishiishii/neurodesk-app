@@ -130,6 +130,7 @@ function createLaunchScript(
             fi
           fi
         else
+          docker stop neurodesktop && docker rm neurodesktop 
           docker pull vnmd/neurodesktop-dev:latest
           ${launchCmd}
         fi
