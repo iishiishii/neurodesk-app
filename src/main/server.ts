@@ -115,6 +115,7 @@ function createLaunchScript(
             )
         ) else (
             echo "Image does not exist"
+            docker stop neurodesktop && docker rm neurodesktop 
             docker pull vnmd/neurodesktop-dev:latest
             ${launchCmd}
         )
