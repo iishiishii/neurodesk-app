@@ -1,6 +1,7 @@
 {
   "name": "neurodesktop-desktop",
-  "version": "3.6.3-1",
+  "version": "3.6.2-1",
+  "neurodesk_version": "0.1.0",
   "description": "Neurodesktop Desktop",
   "main": "./build/out/main/main.js",
   "scripts": {
